@@ -12,18 +12,14 @@ class UserRepository {
     @required String username,
     @required String password,
   }) async {
-    final url = "https://uburners.com/wp-json/jwt-auth/v1/token";
-
-    ///Override with correct creds.
-    // username = 'tusmenkoe@gmail.com';
-    // password = 'udaffcom2';
+    final url = "https://dk.uburners.com/wp-json/jwt-auth/v1/token";
     // Await the auth response, then decode the json-formatted responce to obtain token.
     final response = await http.post(url,
         headers: {HttpHeaders.contentTypeHeader: 'application/json'},
         body: convert.jsonEncode({"username": username, "password": password}));
     if (response.statusCode == 200) {
-      await persistUsername(username);
       final jsonResponse = convert.jsonDecode(response.body);
+      await persistDisplayName(jsonResponse['user_display_name']);
       return jsonResponse['token'];
     } else {
       final jsonResponse = convert.jsonDecode(response.body);
@@ -32,48 +28,51 @@ class UserRepository {
   }
 
   Future<String> requestAccess() async {
-    final url = "https://app-blackbox.herokuapp.com/setGuId";
-    final username = await getUsername();
+    final url = "https://dk.uburners.com/wp-json/residents/v1/token";
 
-    /// Await access GUID code
-    final response = await http.post(url,
-        headers: {HttpHeaders.contentTypeHeader: 'application/json'},
-        body: convert.jsonEncode({"user_data": username}));
+    if (!await hasToken()) return "";
+
+    final token = await getToken();
+
+    /// TODO: Implement Subscription validation via https://dk.uburners.com/wp-json/residents/v1/status
+    /// before Token request
+
+    final response = await http.get(
+      url,
+      headers: {
+        HttpHeaders.contentTypeHeader: 'application/json',
+        HttpHeaders.authorizationHeader: "Bearer " + token
+      },
+    );
+
     if (response.statusCode == 200) {
-      /// Mocked GUID generation to get random guid each refresh.
-      /// var uuid = new Uuid();
-      // return uuid.v4();
       return response.body;
     } else {
       final jsonResponse = convert.jsonDecode(response.body);
-      throw (jsonResponse['message']);
+      throw (jsonResponse['token']);
     }
   }
 
-  Future<void> deleteToken() async {
-    /// remove token from secure keychain
+  Future<void> deleteAuthToken() async {
     _storage.delete(key: "token");
     return;
   }
 
-  Future<void> persistToken(String token) async {
-    /// write to secure keychain
+  Future<void> persistAuthToken(String token) async {
     if (token != null) {
       await _storage.write(key: "token", value: token);
     }
     return;
   }
 
-  Future<void> persistUsername(String username) async {
-    /// write to secure keychain
-    if (username != null) {
-      await _storage.write(key: "username", value: username);
+  Future<void> persistDisplayName(String displayName) async {
+    if (displayName != null) {
+      await _storage.write(key: "userDisplayName", value: displayName);
     }
     return;
   }
 
   Future<void> persistPassCode(String code) async {
-    /// write to secure keychain
     if (code != null) {
       await _storage.write(key: "code", value: code);
     }
@@ -81,21 +80,18 @@ class UserRepository {
   }
 
   Future<String> getPassCode() async {
-    /// write to secure keychain
     return await _storage.read(
       key: "code",
     );
   }
 
-  Future<String> getUsername() async {
-    /// write to secure keychain
+  Future<String> getDisplayName() async {
     return await _storage.read(
-      key: "username",
+      key: "userDisplayName",
     );
   }
 
   Future<bool> hasToken() async {
-    /// read from secure keychain
     return await _storage
         .read(
           key: "token",
@@ -104,7 +100,6 @@ class UserRepository {
   }
 
   Future<String> getToken() async {
-    /// read from secure keychain
     return await _storage.read(
       key: "token",
     );

@@ -17,7 +17,9 @@ class AccessRequesting extends AccessState {
 
 class AccessGranted extends AccessState {
   final String code;
-  AccessGranted({@required this.code}) : super([code]);
+  final String displayName;
+  AccessGranted({@required this.code, @required this.displayName})
+      : super([code, displayName]);
   @override
   String toString() => 'AccessGranted';
 }

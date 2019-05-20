@@ -25,8 +25,9 @@ class AccessBloc extends Bloc<AccessEvent, AccessState> {
 
       try {
         final passCode = await userRepository.requestAccess();
+        final displayName = await userRepository.getDisplayName();
         await userRepository.persistPassCode(passCode);
-        yield AccessGranted(code: passCode);
+        yield AccessGranted(code: passCode, displayName: displayName);
       } catch (error) {
         yield AccessDenied(error: error.toString());
       }

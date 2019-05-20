@@ -37,11 +37,11 @@ class _QrPageState extends State<QrPage> {
     super.initState();
   }
 
-  _qrWidget(String passCode) {
+  _qrWidget(String passCode, String displayName) {
     const double margin = 20;
     final qrWidht = (MediaQuery.of(context).size.width - margin * 2) / 6;
 
-    print("passCode: " + passCode);
+    print("passCode: " + passCode + ", userName: " + displayName);
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: margin, horizontal: margin),
@@ -68,7 +68,7 @@ class _QrPageState extends State<QrPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Text(
-                        "Eugene Tusmenko",
+                        displayName,
                         style: TextStyle(
                             fontWeight: FontWeight.w700, fontSize: 16),
                       ),
@@ -89,7 +89,7 @@ class _QrPageState extends State<QrPage> {
                   // key: globalKey,
                   child: QrImage(
                     version: 4,
-                    errorCorrectionLevel: QrErrorCorrectLevel.Q,
+                    errorCorrectionLevel: QrErrorCorrectLevel.H,
                     backgroundColor: Colors.white,
                     data: passCode,
                     onError: (ex) {
@@ -228,7 +228,7 @@ class _QrPageState extends State<QrPage> {
                 _accessBloc.dispatch(AccessRequestPressed());
               }
               if (state is AccessGranted) {
-                return _qrWidget(state.code);
+                return _qrWidget(state.code, state.displayName);
               }
               if (state is AccessRequesting) {
                 return _loadingWidget();
