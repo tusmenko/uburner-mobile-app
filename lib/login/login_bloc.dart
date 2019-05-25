@@ -35,16 +35,27 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       yield LoginLoading();
 
       try {
-        final token = await userRepository.authenticate(
+        final authData = await userRepository.authenticate(
           username: event.username,
           password: event.password,
         );
 
-        authenticationBloc.dispatch(LoggedIn(token: token));
+        authenticationBloc.dispatch(LoggedIn(
+            token: authData["token"],
+            displayName: authData["user_display_name"]));
         yield LoginInitial();
+      } on TimeoutException catch (_) {
+        yield LoginFailure(
+            error: "Login Timeout Exception", code: LoginError.other);
+      } on FormatException catch (_) {
+        ///Temporary workaround to handle unimplemented AUTH exceptionns.
+        yield LoginFailure(
+            error: "Wrong user or password", code: LoginError.invalidPassword);
       } catch (error) {
-        var loginError = loginErrorMapping[error["code"]] ?? LoginError.other;
-        yield LoginFailure(error: error["message"], code: loginError);
+        // var loginError = loginErrorMapping.containsKey(error.code)
+        //     ? loginErrorMapping[error.code]
+        //     : LoginError.other;
+        yield LoginFailure(error: error.message, code: LoginError.other);
       }
     }
   }
