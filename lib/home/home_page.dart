@@ -5,6 +5,7 @@ import 'package:qr/qr.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:uburner/common/user_repository.dart';
 import 'package:uburner/access/access.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class QrPage extends StatefulWidget {
   final UserRepository userRepository;
@@ -18,12 +19,12 @@ class QrPage extends StatefulWidget {
 }
 
 class _QrPageState extends State<QrPage> {
-  AssetImage _tiket = new AssetImage("assets/ticket.png");
   AssetImage _tiketLoader = new AssetImage("assets/ticket_loader.png");
   AssetImage _tiketTop = new AssetImage("assets/ticket_top.png");
   AssetImage _tiketBottom = new AssetImage("assets/ticket_bottom.png");
   AssetImage _sad = new AssetImage("assets/sad.png");
 
+  final String paymentUrl = "https://kurenivka.com.ua/cart/?add-to-cart=52";
   AccessBloc _accessBloc;
   AuthenticationBloc _authenticationBloc;
   UserRepository get _userRepository => widget.userRepository;
@@ -117,7 +118,7 @@ class _QrPageState extends State<QrPage> {
         ));
   }
 
-  _deniedWidget() {
+  _deniedWidget(String displayName) {
     const double margin = 20;
     final qrWidht = (MediaQuery.of(context).size.width - margin * 2) / 6;
 
@@ -146,7 +147,7 @@ class _QrPageState extends State<QrPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Text(
-                        "Eugene Tusmenko",
+                        displayName,
                         style: TextStyle(
                             fontWeight: FontWeight.w700, fontSize: 16),
                       ),
@@ -166,12 +167,18 @@ class _QrPageState extends State<QrPage> {
                     Image.asset(_sad.assetName),
                     Padding(
                         padding: EdgeInsets.only(top: 20),
-                        child: Text("Ooops, Ваша подписка не продлена.",
+                        child: Text("Ooops, Ваша подписка не продлена...",
                             textAlign: TextAlign.center)),
                     Padding(
-                        padding: EdgeInsets.only(top: 20, bottom: 70),
-                        child: Text("Обратитесь к ассистенту на стойке",
-                            textAlign: TextAlign.center))
+                        padding: EdgeInsets.only(top: 20, bottom: 30),
+                        child: Text("Перейдите по ссылке для оплаты:",
+                            textAlign: TextAlign.center)),
+                    SizedBox(
+                        height: 30,
+                        child: FlatButton(
+                          child: Text('Продлить подписку'),
+                          onPressed: () => launch(paymentUrl),
+                        )),
                   ],
                 ),
               ),
@@ -234,7 +241,7 @@ class _QrPageState extends State<QrPage> {
                 return _loadingWidget();
               }
               if (state is AccessDenied) {
-                return _deniedWidget();
+                return _deniedWidget(state.displayName);
               }
               return _loadingWidget();
             }));

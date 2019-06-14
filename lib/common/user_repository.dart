@@ -47,11 +47,11 @@ class UserRepository {
     );
 
     if (response.statusCode == 200) {
-      return response.body;
-    } else {
       final jsonResponse = convert.jsonDecode(response.body);
-      throw (jsonResponse['token']);
+      final accessToken = jsonResponse['token'];
+      if (accessToken != null) return accessToken;
     }
+    throw (response.body);
   }
 
   Future<void> deleteAuthToken() async {

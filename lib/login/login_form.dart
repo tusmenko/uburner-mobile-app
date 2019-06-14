@@ -26,9 +26,9 @@ class _LoginFormState extends State<LoginForm> {
   final _passwordController = TextEditingController();
   bool _passwordVisible = false;
 
-  final String registerUrl = "";
-  final String recoverPwdUrl =
-      "https://uburners.com/wp-login.php?action=lostpassword";
+  final String registerUrl = "https://kurenivka.com.ua/register/";
+  final String recoverPwdUrl = "https://kurenivka.com.ua/lost-password/";
+  final String payment = "https://dk.uburners.com/cart/?add-to-cart=52";
 
   LoginBloc get _loginBloc => widget.loginBloc;
 
@@ -134,7 +134,7 @@ class _LoginFormState extends State<LoginForm> {
                   Padding(
                       padding: EdgeInsets.only(top: 20),
                       child: SizedBox(
-                          height: 40,
+                          height: 48,
                           width: double.infinity, // match_parent
                           child: RaisedButton(
                             child: Text('ВОЙТИ'),
@@ -151,7 +151,7 @@ class _LoginFormState extends State<LoginForm> {
                           child: FlatButton(
                         child: Text('Забыли пароль?'),
                         onPressed: state is! LoginLoading
-                            ? () => {launch(recoverPwdUrl)}
+                            ? () => launch(recoverPwdUrl)
                             : null,
                       ))),
                 ],

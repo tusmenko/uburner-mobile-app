@@ -26,8 +26,10 @@ class AccessGranted extends AccessState {
 
 class AccessDenied extends AccessState {
   final String error;
+  final String displayName;
 
-  AccessDenied({@required this.error}) : super([error]);
+  AccessDenied({@required this.error, @required this.displayName})
+      : super([error, displayName]);
   @override
   String toString() => 'AccessDenied { error: $error }';
 }

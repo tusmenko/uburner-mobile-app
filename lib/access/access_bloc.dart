@@ -22,14 +22,14 @@ class AccessBloc extends Bloc<AccessEvent, AccessState> {
   ) async* {
     if (event is AccessRequestPressed) {
       yield AccessRequesting();
-
+      String displayName = "";
       try {
+        displayName = await userRepository.getDisplayName();
         final passCode = await userRepository.requestAccess();
-        final displayName = await userRepository.getDisplayName();
         await userRepository.persistPassCode(passCode);
         yield AccessGranted(code: passCode, displayName: displayName);
       } catch (error) {
-        yield AccessDenied(error: error.toString());
+        yield AccessDenied(displayName: displayName, error: error.toString());
       }
     }
   }
